@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets Network WebSockets Charts)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network WebSockets Charts)
 
-add_executable(scylla_ws_client WIN32 MACOSX_BUNDLE
+
+
+qt_add_executable(scylla_ws_client WIN32 MACOSX_BUNDLE
     main.cpp
     CqlUtil.h CqlUtil.cpp
     WsClient.h WsClient.cpp
@@ -22,8 +24,15 @@ add_executable(scylla_ws_client WIN32 MACOSX_BUNDLE
     MainWindow.h MainWindow.cpp
 )
 
+if(EMSCRIPTEN)
+    #target_link_options(scylla_ws_client PRIVATE "-lembind")
+    # для старых emsdk вместо этого: "--bind"
+endif()
+
+
 target_link_libraries(scylla_ws_client PRIVATE
     Qt6::Widgets Qt6::Network Qt6::WebSockets Qt6::Charts)
+#target_link_libraries(scylla_ws_client PRIVATE scylladbcql)
 
 install(TARGETS scylla_ws_client
     RUNTIME DESTINATION bin

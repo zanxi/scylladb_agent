@@ -113,7 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
     m_ws->setSslErrorHandler([this](const QList<QSslError> &errors) {
         QStringList msgs;
-        for (const auto &e : errors) msgs << e.errorString();
+//        for (const auto &e : errors) msgs << e.errorString();
         return QMessageBox::warning(this, tr("Сертификат сервера"),
                                     tr("Проблемы с сертификатом:\n%1\n\nВсё равно подключиться?")
                                         .arg(msgs.join('\n')),

@@ -10,6 +10,19 @@
 #include <algorithm>
 #include <cmath>
 
+
+namespace {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+inline QTimeZone utcZone() { return QTimeZone(QTimeZone::UTC); }   // работает и без QT_CONFIG(timezone)
+inline void setUtc(QDateTime &dt) { dt.setTimeZone(utcZone()); }
+inline QDateTime startOfDayUtc(const QDate &d) { return d.startOfDay(utcZone()); }
+#else
+inline void setUtc(QDateTime &dt) { dt.setTimeSpec(Qt::UTC); }
+inline QDateTime startOfDayUtc(const QDate &d) { return d.startOfDay(Qt::UTC); }
+#endif
+} // namespace
+
+
 void sortColumns(QVector<ColumnInfo> &cols)
 {
     auto rank = [](const ColumnInfo &c) {
@@ -118,7 +131,10 @@ QString normalizeTimestamp(const QString &in)
                                          "dd.MM.yyyy" };
         for (const char *f : formats) {
             dt = QDateTime::fromString(s, QString::fromLatin1(f));
-            if (dt.isValid()) { dt.setTimeZone(QTimeZone::utc()); break; }
+            if (dt.isValid()) { 
+            //dt.setTimeZone(QTimeZone::utc());
+            setUtc(dt);
+             break; }
         }
     }
     if (!dt.isValid())
@@ -334,7 +350,8 @@ bool toNumber(const QJsonValue &v, double *out, bool *isDateTime)
     if (!dt.isValid()) {
         const QDate date = QDate::fromString(s, Qt::ISODate);
         if (date.isValid())
-            dt = date.startOfDay(QTimeZone::utc());
+        //    dt = date.startOfDay(QTimeZone::utc());
+        dt = startOfDayUtc(date);
     }
     if (dt.isValid()) {
         *out = double(dt.toMSecsSinceEpoch());
